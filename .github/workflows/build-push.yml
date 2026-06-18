@@ -1,4 +1,4 @@
-# Build and push Docker image to GitHub Container Registry
+# Build and push Docker image to Amazon ECR with Trivy scan and Cosign signing
 name: Build and Push Image
 
 on:
@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - 'src/api/**'
-      - '.github/workflows/build-push.yml'
+      - "src/api/**"
+      - ".github/workflows/build-push.yml"
   workflow_dispatch:
 
 jobs:
@@ -16,6 +16,7 @@ jobs:
     environment: demo
     permissions:
       contents: write
+      id-token: write # Cần thiết cho Cosign nếu dùng keyless (ở đây dùng key-based)
 
     steps:
       - name: Checkout repository
@@ -54,7 +55,31 @@ jobs:
             type=raw,value=${{ steps.semver.outputs.version }}
             type=sha,prefix=v${{ steps.semver.outputs.version }}-
 
+      # --- BƯỚC 1: BUILD LÀM VẬT MẪU ĐỂ QUÉT LỖ HỔNG ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build local image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/api
+          load: true
+          tags: temp-scan-image:latest
+
+      # --- BƯỚC 2: CHẠY TRIVY SCAN ---
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "temp-scan-image:latest"
+          format: "table"
+          exit-code: "1"
+          ignore-unfixed: true # Không block bởi các lỗi chưa có bản vá
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+
+      # --- BƯỚC 3: BUILD VÀ PUSH THẬT LÊN ECR ---
       - name: Build and push Docker image
+        id: build-push
         uses: docker/build-push-action@v6
         with:
           context: ./src/api
@@ -62,6 +87,18 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      # --- BƯỚC 4: CÀI ĐẶT COSIGN VÀ KÝ SỐ LÊN ẢNH ---
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Sign the published Docker image
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY "${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}@${{ steps.build-push.outputs.digest }}"
+
+      # --- BƯỚC 5: CẬP NHẬT FILE ROLLOUT ---
       - name: Update rollout.yaml with new version
         run: |
           sed -i "s|image: .*|image: ${{ steps.login-ecr.outputs.registry }}/${{ vars.ECR_REPOSITORY }}:${{ steps.semver.outputs.version }}|g" app-api/rollout.yaml
@@ -75,7 +112,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: bump version to v${{ steps.semver.outputs.version }}"
+            git commit -m "chore: bump version to v${{ steps.semver.outputs.version }} [skip ci]"
             git push
           fi
 
