@@ -15,5 +15,6 @@ spec:
       - gatekeeper-system
       - argocd
       - monitoring
+      - external-secrets
   parameters:
     tags: ["latest"]
