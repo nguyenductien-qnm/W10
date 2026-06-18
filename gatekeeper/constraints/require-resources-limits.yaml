@@ -10,3 +10,8 @@ spec:
     kinds:
       - apiGroups: [""]
         kinds: ["Pod"]
+    excludedNamespaces:
+      - kube-system
+      - gatekeeper-system
+      - argocd
+      - monitoring
