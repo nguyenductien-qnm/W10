@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-web
+  namespace: payments
+  labels:
+    app: payments-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-web
+  template:
+    metadata:
+      labels:
+        app: payments-web
+    spec:
+      containers:
+      - name: web
+        image: 730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10:0.0.6
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+        resources:
+          limits:
+            cpu: 50m
+            memory: 64Mi
+          requests:
+            cpu: 20m
+            memory: 32Mi
+        ports:
+        - containerPort: 5000
