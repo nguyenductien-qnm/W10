@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: ghcr.io/nguyenductien-qnm/w10-api:0.0.1
+        image: 730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10:0.0.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
