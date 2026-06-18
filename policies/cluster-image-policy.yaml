@@ -1,0 +1,14 @@
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: ecr-image-policy
+spec:
+  images:
+    - glob: "730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10*"
+  authorities:
+    - key:
+        data: |
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEv1BxJ6CaurUd9JbW3fGmzcbRZQaJ
+          ogB6cHsOu/9mvVnA4+wka0C4e7t7OZaP0MfidfdpZktT0+KSFEk+/QVHZg==
+          -----END PUBLIC KEY-----
