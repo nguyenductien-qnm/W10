@@ -45,8 +45,8 @@ spec:
             initialDelaySeconds: 3
           resources:
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
           volumeMounts:
             - name: db-secret-volume
               mountPath: /secrets/db-secret
