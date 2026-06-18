@@ -1,0 +1,12 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sAllowedUsers
+metadata:
+  name: restrict-root-user
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]

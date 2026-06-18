@@ -1,0 +1,49 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sdisallowedtags
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sDisallowedTags
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            tags:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdisallowedtags
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          tag := get_tag(container.image)
+          forbidden := input.parameters.tags[_]
+          tag == forbidden
+          msg := sprintf("Container %v has disallowed image tag %v", [container.name, tag])
+        }
+
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.initContainers[_]
+          tag := get_tag(container.image)
+          forbidden := input.parameters.tags[_]
+          tag == forbidden
+          msg := sprintf("InitContainer %v has disallowed image tag %v", [container.name, tag])
+        }
+
+        get_tag(image) = tag {
+          parts := split(image, ":")
+          count(parts) > 1
+          tag := parts[count(parts) - 1]
+        }
+        get_tag(image) = "latest" {
+          parts := split(image, ":")
+          count(parts) == 1
+        }
