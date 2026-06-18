@@ -11,6 +11,24 @@ spec:
     repoURL: https://sigstore.github.io/helm-charts
     targetRevision: 0.9.1
     chart: policy-controller
+    helm:
+      values: |
+        webhook:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+        webhookController:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: cosign-system
