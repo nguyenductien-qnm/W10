@@ -20,42 +20,49 @@ spec:
         app: api
     spec:
       imagePullSecrets:
-      - name: ecr-registry-key
+        - name: ecr-registry-key
       containers:
-      - name: api
-        image: 730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10:0.0.3
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 5000
-          protocol: TCP
-        env:
-        - name: VERSION
-          value: "v0.0.3"
-        - name: ERROR_RATE
-          value: "0"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 5000
-          initialDelaySeconds: 5
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 5000
-          initialDelaySeconds: 3
-        resources:
-          limits:
-            cpu: 200m
-            memory: 128Mi
+        - name: api
+          image: 730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10:0.0.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          env:
+            - name: VERSION
+              value: "v0.0.3"
+            - name: ERROR_RATE
+              value: "0"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 5000
+            initialDelaySeconds: 3
+          resources:
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: db-secret-volume
+              mountPath: /secrets/db-secret
+      volumes:
+        - name: db-secret-volume
+          secret:
+            secretName: db-secret
   strategy:
     canary:
       analysis:
         templates:
-        - templateName: success-rate
+          - templateName: success-rate
         startingStep: 1
       steps:
-      - setWeight: 10
-      - pause: {duration: 2m}
-      - setWeight: 50
-      - pause: {duration: 2m}
-      - setWeight: 100
+        - setWeight: 10
+        - pause: { duration: 2m }
+        - setWeight: 50
+        - pause: { duration: 2m }
+        - setWeight: 100

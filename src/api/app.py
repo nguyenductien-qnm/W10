@@ -253,6 +253,20 @@ HTML_TEMPLATE = """
                 <h3>Mô phỏng lỗi</h3>
                 <p>Tỷ lệ lỗi mô phỏng (Error Injection Rate) để kiểm thử cơ chế tự động rollback của Argo Rollouts.</p>
             </div>
+            <!-- Card 5: External Secrets (ESO) -->
+            <div class="card" style="grid-column: span 2; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.02);">
+                <div class="card-header">
+                    <div class="icon-wrapper" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                        <i data-lucide="key-round"></i>
+                    </div>
+                    <span class="status-badge" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">Synced</span>
+                </div>
+                <h3>External Secrets Operator (ESO)</h3>
+                <p style="margin-bottom: 8px;">Đồng bộ mật khẩu CSDL tự động dưới 60s mà không cần khởi động lại Pod.</p>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #f59e0b;">
+                    Mật khẩu CSDL: <strong id="db-password">{{ db_password }}</strong>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -269,9 +283,25 @@ HTML_TEMPLATE = """
 </html>
 """
 
+def get_db_password():
+    secret_path = "/secrets/db-secret/password"
+    if os.path.exists(secret_path):
+        try:
+            with open(secret_path, "r") as f:
+                return f.read().strip()
+        except Exception as e:
+            return f"Error: {str(e)}"
+    return "Secret Not Mounted"
+
 @app.get("/")
 def index():
-    return render_template_string(HTML_TEMPLATE, version=VERSION, error_rate=f"{int(ERROR_RATE * 100)}%")
+    db_password = get_db_password()
+    return render_template_string(
+        HTML_TEMPLATE,
+        version=VERSION,
+        error_rate=f"{int(ERROR_RATE * 100)}%",
+        db_password=db_password
+    )
 
 @app.get("/healthz")
 def healthz():
