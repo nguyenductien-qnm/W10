@@ -15,6 +15,8 @@ spec:
       labels:
         app: payments-web
     spec:
+      imagePullSecrets:
+        - name: ecr-registry-key
       containers:
       - name: web
         image: 730335441285.dkr.ecr.ap-southeast-1.amazonaws.com/w10:0.0.6
