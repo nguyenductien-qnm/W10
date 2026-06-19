@@ -17,6 +17,9 @@ Deploy API với **canary strategy** và **automated analysis**:
 - minikube
 - git
 
+> [!NOTE]
+> **Infrastructure Note:** This project is deployed on an AWS EC2 instance. The EC2 instance is associated with an IAM Instance Profile (IAM Role) that has read permissions for **Amazon ECR** and **AWS Secrets Manager**. As a result, no AWS access keys are hardcoded in the manifests or stored in Git, leveraging IAM role-based authentication.
+
 ## Structure
 
 ```
