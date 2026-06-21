@@ -16,22 +16,28 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>W10 - Platform Delivery & Security Dashboard</title>
+    <title>W10 - Enterprise Platform Security & Delivery Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --bg-color: #03000a;
-            --card-bg: rgba(13, 8, 28, 0.65);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --accent-primary: #8b5cf6;
+            --bg-color: #f8fafc;
+            --panel-bg: rgba(255, 255, 255, 0.75);
+            --border-color: rgba(15, 23, 42, 0.08);
+            --accent-primary: #6366f1;
+            --accent-primary-glow: rgba(99, 102, 241, 0.15);
             --accent-secondary: #ec4899;
-            --accent-glow: rgba(139, 92, 246, 0.25);
-            --text-main: #f3f4f6;
-            --text-secondary: #9ca3af;
+            --text-main: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
             --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.15);
             --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.15);
             --danger: #ef4444;
+            --shadow-sm: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 12px 24px -10px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 25px 50px -12px rgba(15, 23, 42, 0.06);
         }
 
         * {
@@ -44,311 +50,519 @@ HTML_TEMPLATE = """
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-color);
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%),
-                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 5% 5%, rgba(99, 102, 241, 0.06) 0%, transparent 35%),
+                radial-gradient(circle at 95% 95%, rgba(236, 72, 153, 0.05) 0%, transparent 35%),
+                linear-gradient(rgba(15, 23, 42, 0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.012) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
             overflow-x: hidden;
             position: relative;
         }
 
-        /* Ambient floating orbs */
+        /* Ambient glowing orbs */
         .orb {
             position: absolute;
-            width: 250px;
-            height: 250px;
+            width: 350px;
+            height: 350px;
             border-radius: 50%;
-            filter: blur(100px);
+            filter: blur(120px);
             z-index: -1;
-            opacity: 0.6;
-            animation: float 12s infinite alternate ease-in-out;
+            opacity: 0.35;
+            animation: float 16s infinite alternate ease-in-out;
         }
         .orb-1 {
-            background: var(--accent-primary);
-            top: 20%;
-            left: 25%;
+            background: linear-gradient(135deg, var(--accent-primary), #a78bfa);
+            top: 15%;
+            left: 20%;
         }
         .orb-2 {
-            background: var(--accent-secondary);
-            bottom: 20%;
-            right: 25%;
-            animation-delay: -6s;
+            background: linear-gradient(135deg, var(--accent-secondary), #f472b6);
+            bottom: 15%;
+            right: 20%;
+            animation-delay: -8s;
         }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 20px) scale(1.15); }
+            100% { transform: translate(40px, 30px) scale(1.15); }
         }
 
-        .container {
+        .dashboard-wrapper {
             width: 100%;
-            max-width: 540px;
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            max-width: 1080px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
             border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 
-                0 30px 60px -15px rgba(0, 0, 0, 0.8),
-                0 0 50px -10px var(--accent-glow);
-            position: relative;
-            z-index: 10;
+            border-radius: 28px;
+            box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.6);
             overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr;
+            z-index: 10;
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        @media (min-width: 820px) {
+            .dashboard-wrapper {
+                grid-template-columns: 360px 1fr;
+            }
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 25px;
+        /* Left Sidebar: Hero Status & Metrics */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.45);
+            border-bottom: 1px solid var(--border-color);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 40px;
         }
 
-        .badge {
+        @media (min-width: 820px) {
+            .sidebar {
+                border-bottom: none;
+                border-right: 1px solid var(--border-color);
+            }
+        }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .system-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: rgba(139, 92, 246, 0.12);
-            color: #c084fc;
+            gap: 8px;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.15);
             padding: 6px 14px;
             border-radius: 100px;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             font-weight: 600;
+            color: var(--accent-primary);
+            align-self: flex-start;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            margin-bottom: 12px;
         }
 
-        h1 {
+        .sidebar-title h1 {
             font-size: 2.2rem;
             font-weight: 800;
+            line-height: 1.15;
             letter-spacing: -0.04em;
-            margin-bottom: 4px;
-            background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+            background: linear-gradient(135deg, #1e1b4b 20%, #4338ca 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
         }
 
-        .lead {
+        .sidebar-title p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 400;
+            font-size: 0.95rem;
+            line-height: 1.5;
         }
 
-        /* Secret Key Section */
-        .secret-box {
-            background: rgba(10, 5, 20, 0.8);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            padding: 16px;
+        /* Live health stats visualizer */
+        .live-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
-            margin-bottom: 22px;
-            position: relative;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transition: all 0.3s ease;
-        }
-        
-        .secret-box:hover {
-            border-color: rgba(245, 158, 11, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.05);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .secret-header {
+        .stat-meta {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            color: var(--warning);
-            margin-bottom: 8px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
-        .secret-value-container {
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .stat-unit {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Pure CSS Sparkline simulation */
+        .sparkline {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 24px;
+            width: 80px;
+        }
+
+        .sparkbar {
+            width: 4px;
+            background-color: var(--accent-primary);
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+        .sparkbar:nth-child(odd) {
+            height: 40%;
+            animation: bounce-stat-1 2s infinite alternate ease-in-out;
+        }
+        .sparkbar:nth-child(even) {
+            height: 75%;
+            animation: bounce-stat-2 2.4s infinite alternate ease-in-out;
+        }
+        @keyframes bounce-stat-1 {
+            0% { height: 35%; } 100% { height: 90%; }
+        }
+        @keyframes bounce-stat-2 {
+            0% { height: 80%; } 100% { height: 45%; }
+        }
+
+        /* Right Panel: Content Area */
+        .main-panel {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .section-header {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 8px 12px;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
         }
 
-        .secret-value {
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Secret Box Card (AWS integration) */
+        .aws-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(253, 246, 227, 0.5) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .aws-card:hover {
+            border-color: rgba(245, 158, 11, 0.45);
+            box-shadow: 0 15px 30px -10px rgba(245, 158, 11, 0.1);
+        }
+
+        .aws-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .aws-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .aws-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--warning);
+        }
+
+        .aws-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: var(--warning-glow);
+            color: var(--warning);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(245, 158, 11, 0.15);
+        }
+
+        .secret-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.02);
+        }
+
+        .secret-field {
             flex-grow: 1;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-            color: #f59e0b;
+            font-size: 1.15rem;
+            color: var(--warning);
             font-weight: 700;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             border: none;
             background: transparent;
             outline: none;
             width: 100%;
         }
 
-        .action-btn {
+        .action-button {
             background: transparent;
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 8px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             margin-left: 6px;
         }
 
-        .action-btn:hover {
+        .action-button:hover {
             color: var(--text-main);
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.05);
         }
 
-        .action-btn:active {
+        .action-button:active {
             transform: scale(0.92);
         }
 
-        /* Features Grid */
-        .grid {
+        /* GitOps Components Grid */
+        .components-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.02);
+        .comp-card {
+            background: rgba(255, 255, 255, 0.55);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 14px;
+            border-radius: 18px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
         }
 
-        .card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.04);
-            border-color: rgba(139, 92, 246, 0.3);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.06);
+        .comp-card:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: var(--accent-primary-glow);
+            box-shadow: var(--shadow-md), 0 10px 20px -10px var(--accent-primary-glow);
         }
 
-        .card-header {
+        .comp-icon-wrapper {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            margin-bottom: 4px;
         }
 
-        .card-title {
-            font-weight: 600;
-            font-size: 0.8rem;
-            color: var(--text-main);
-        }
-
-        .status-badge {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            border-radius: 6px;
+        .comp-name {
             font-weight: 700;
-            align-self: flex-start;
-            text-transform: uppercase;
-        }
-
-        .status-version {
-            background: rgba(139, 92, 246, 0.15);
-            color: #d8b4fe;
-            border: 1px solid rgba(139, 92, 246, 0.2);
-        }
-
-        .status-active {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(17, 12, 28, 0.9);
-            border: 1px solid var(--accent-primary);
+            font-size: 0.95rem;
             color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
+            letter-spacing: -0.01em;
+        }
+
+        .comp-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .badge-status {
+            align-self: flex-start;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-indigo {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--accent-primary);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+        }
+
+        .badge-emerald {
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.12);
+        }
+
+        .badge-blue {
+            background: rgba(59, 130, 246, 0.08);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.12);
+        }
+
+        .badge-rose {
+            background: rgba(244, 63, 94, 0.08);
+            color: #f43f5e;
+            border: 1px solid rgba(244, 63, 94, 0.12);
+        }
+
+        /* Activity Console / Live Logs */
+        .console-panel {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 16px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: #e2e8f0;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 140px;
+            overflow-y: auto;
         }
 
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
+        .console-line {
+            display: flex;
+            gap: 8px;
+            line-height: 1.5;
         }
 
-        footer {
+        .console-time {
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        .console-prefix {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+
+        .console-success {
+            color: #4ade80;
+        }
+
+        /* Bottom Footer inside card */
+        .panel-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
             border-top: 1px solid var(--border-color);
-            padding-top: 16px;
+            padding-top: 20px;
             margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
 
-        .status-indicator {
+        .indicator-group {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .pulse-dot {
+        .status-dot {
             width: 8px;
             height: 8px;
             background-color: var(--success);
             border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse 1.6s infinite;
+            position: relative;
         }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                transform: scale(1);
-                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-            }
-            100% {
-                transform: scale(0.95);
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse-ring 1.8s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.75; }
+            70% { transform: scale(2.2); opacity: 0; }
+            100% { transform: scale(0.95); opacity: 0; }
+        }
+
+        /* Toast Popup */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: #0f172a;
+            border: 1px solid var(--accent-primary);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
@@ -356,85 +570,186 @@ HTML_TEMPLATE = """
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <div class="container">
-        <header>
-            <div class="badge">
-                <i data-lucide="shield-check" style="width: 13px; height: 13px;"></i>
-                GitOps DevSecOps Platform
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="system-badge">
+                    <i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i>
+                    Secured Platform
+                </div>
+                <div class="sidebar-title">
+                    <h1>Enterprise</h1>
+                    <h1>Control</h1>
+                    <p>Trạng thái phân phối DevSecOps & giám sát toàn diện hạ tầng</p>
+                </div>
             </div>
-            <h1>Platform Control</h1>
-            <p class="lead">Trạng thái bảo mật & cấu hình tự động</p>
-        </header>
 
-        <!-- Dynamic Database Secret from AWS Secrets Manager -->
-        <div class="secret-box">
-            <div class="secret-header">
-                <span>AWS Secrets Manager (via ESO)</span>
-                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; background: rgba(245,158,11,0.15); padding: 2px 6px; border-radius: 4px;">Dynamic Refresh</span>
+            <!-- Health visualizer -->
+            <div class="live-stats">
+                <div class="stat-item">
+                    <div class="stat-meta">
+                        <span>LIVE RESPONSE TIME</span>
+                        <i data-lucide="activity" style="width: 14px; height: 14px; color: var(--accent-primary);"></i>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <span class="stat-value">42 <span class="stat-unit">ms</span></span>
+                        <div class="sparkline">
+                            <span class="sparkbar"></span>
+                            <span class="sparkbar"></span>
+                            <span class="sparkbar"></span>
+                            <span class="sparkbar"></span>
+                            <span class="sparkbar"></span>
+                            <span class="sparkbar"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-meta">
+                        <span>ERROR RATE LIMIT</span>
+                        <i data-lucide="zap-off" style="width: 14px; height: 14px; color: var(--danger);"></i>
+                    </div>
+                    <span class="stat-value" style="color: var(--success);">{{ error_rate }}</span>
+                </div>
             </div>
-            <div class="secret-value-container">
-                <input type="password" id="secretValue" class="secret-value" value="{{ db_password }}" readonly>
-                <button class="action-btn" id="toggleBtn" onclick="toggleSecret()" title="Hiện/Ẩn">
-                    <i data-lucide="eye" id="eyeIcon" style="width: 16px; height: 16px;"></i>
-                </button>
-                <button class="action-btn" onclick="copySecret()" title="Sao chép">
-                    <i data-lucide="copy" style="width: 16px; height: 16px;"></i>
-                </button>
+
+            <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                <i data-lucide="globe" style="width: 12px; height: 12px;"></i>
+                Nodes: Kubernetes Multi-AZ Cluster
             </div>
         </div>
 
-        <!-- GitOps Features Grid -->
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <i data-lucide="git-pull-request" style="color: #c084fc; width: 16px; height: 16px;"></i>
-                    <span class="card-title">Argo Rollouts</span>
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="section-header">
+                <div class="section-title">
+                    <i data-lucide="shield-check" style="color: var(--accent-primary); width: 20px; height: 20px;"></i>
+                    Secrets Synchronization
                 </div>
-                <span class="status-badge status-version">{{ version }}</span>
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-muted);">
+                    <i data-lucide="refresh-cw" class="spin-icon" style="width: 12px; height: 12px; animation: spin 8s linear infinite;"></i>
+                    ESO polling 60s
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <i data-lucide="lock" style="color: #34d399; width: 16px; height: 16px;"></i>
-                    <span class="card-title">OPA Gatekeeper</span>
+            <!-- Secrets Manager Card -->
+            <div class="aws-card">
+                <div class="aws-header">
+                    <div class="aws-title">
+                        <i data-lucide="key-round" style="width: 16px; height: 16px;"></i>
+                        AWS Secrets Manager
+                    </div>
+                    <span class="aws-tag">Dynamic Secret</span>
                 </div>
-                <span class="status-badge status-active">Enforced</span>
+                <div class="secret-input-wrapper">
+                    <input type="password" id="secretValue" class="secret-field" value="{{ db_password }}" readonly>
+                    <button class="action-button" id="toggleBtn" onclick="toggleSecret()" title="Ẩn/Hiện mật khẩu">
+                        <i data-lucide="eye" id="eyeIcon" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <button class="action-button" onclick="copySecret()" title="Sao chép mật khẩu">
+                        <i data-lucide="copy" style="width: 18px; height: 18px;"></i>
+                    </button>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <i data-lucide="users" style="color: #60a5fa; width: 16px; height: 16px;"></i>
-                    <span class="card-title">Cluster RBAC</span>
+            <div class="section-header" style="margin-top: 10px;">
+                <div class="section-title">
+                    <i data-lucide="boxes" style="color: var(--accent-primary); width: 20px; height: 20px;"></i>
+                    Platform Security Components
                 </div>
-                <span class="status-badge" style="background: rgba(96, 165, 250, 0.15); color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.2);">Enabled</span>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <i data-lucide="shield" style="color: #f43f5e; width: 16px; height: 16px;"></i>
-                    <span class="card-title">Trivy & Cosign</span>
+            <!-- Grid of components -->
+            <div class="components-grid">
+                <div class="comp-card">
+                    <div>
+                        <div class="comp-icon-wrapper" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary);">
+                            <i data-lucide="git-merge" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h3 class="comp-name">Argo Rollouts</h3>
+                        <p class="comp-desc">Hỗ trợ chiến lược Canary & Progressive delivery tự động.</p>
+                    </div>
+                    <span class="badge-status badge-indigo">{{ version }}</span>
                 </div>
-                <span class="status-badge" style="background: rgba(244, 63, 94, 0.15); color: #fca5a5; border: 1px solid rgba(244, 63, 94, 0.2);">Verified</span>
+
+                <div class="comp-card">
+                    <div>
+                        <div class="comp-icon-wrapper" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            <i data-lucide="fingerprint" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h3 class="comp-name">OPA Gatekeeper</h3>
+                        <p class="comp-desc">Đảm bảo tuân thủ tiêu chuẩn an toàn qua Admission Control.</p>
+                    </div>
+                    <span class="badge-status badge-emerald">Enforced</span>
+                </div>
+
+                <div class="comp-card">
+                    <div>
+                        <div class="comp-icon-wrapper" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i data-lucide="users-round" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h3 class="comp-name">Cluster RBAC</h3>
+                        <p class="comp-desc">Nguyên tắc đặc quyền tối thiểu (least-privilege) cho workload.</p>
+                    </div>
+                    <span class="badge-status badge-blue">Least Privilege</span>
+                </div>
+
+                <div class="comp-card">
+                    <div>
+                        <div class="comp-icon-wrapper" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;">
+                            <i data-lucide="binary" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h3 class="comp-name">Cosign Verification</h3>
+                        <p class="comp-desc">Xác minh chữ ký số ảnh docker trước khi triển khai.</p>
+                    </div>
+                    <span class="badge-status badge-rose">Verified</span>
+                </div>
+            </div>
+
+            <!-- Simulated live audit log feed -->
+            <div class="console-panel">
+                <div class="console-line">
+                    <span class="console-time">[10:31:02]</span>
+                    <span class="console-prefix">SYSTEM:</span>
+                    <span>ArgoCD application synchronized state successfully.</span>
+                </div>
+                <div class="console-line">
+                    <span class="console-time">[10:31:05]</span>
+                    <span class="console-prefix">ESO:</span>
+                    <span class="console-success">Synced secret "db-secret" from AWS Secrets Manager store.</span>
+                </div>
+                <div class="console-line">
+                    <span class="console-time">[10:32:00]</span>
+                    <span class="console-prefix">ROLLOUT:</span>
+                    <span>Starting canary analysis template for "success-rate".</span>
+                </div>
+                <div class="console-line">
+                    <span class="console-time">[10:32:45]</span>
+                    <span class="console-prefix">GATEKEEPER:</span>
+                    <span class="console-success">Admission request allowed: no policy violations.</span>
+                </div>
+            </div>
+
+            <!-- Footer area -->
+            <div class="panel-footer">
+                <div class="indicator-group">
+                    <div class="status-dot"></div>
+                    <span>Deployment: <strong style="color: var(--success);">Online</strong></span>
+                </div>
+                <span>W10 Secure Platform Core v1.4</span>
             </div>
         </div>
-
-        <footer>
-            <div class="status-indicator">
-                <div class="pulse-dot"></div>
-                <span>Status: <strong style="color: #34d399; font-weight: 600;">Active</strong></span>
-            </div>
-            <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; opacity: 0.7;">W10 • Secure & Operate</span>
-        </footer>
     </div>
 
     <!-- Copy Toast -->
-    <div id="toast" class="toast">
-        <i data-lucide="check-circle" style="width: 16px; height: 16px; color: #34d399;"></i>
-        <span>Đã sao chép mật khẩu vào bộ nhớ tạm!</span>
+    <div id="toastNotification" class="toast-notification">
+        <i data-lucide="check-circle" style="width: 18px; height: 18px; color: #34d399;"></i>
+        <span>Đã sao chép mật khẩu AWS vào clipboard!</span>
     </div>
 
     <script>
-        // Khởi tạo Lucide Icons
+        // Init Lucide
         lucide.createIcons();
 
         function toggleSecret() {
@@ -454,16 +769,23 @@ HTML_TEMPLATE = """
         function copySecret() {
             const input = document.getElementById('secretValue');
             navigator.clipboard.writeText(input.value).then(() => {
-                const toast = document.getElementById('toast');
+                const toast = document.getElementById('toastNotification');
                 toast.classList.add('show');
                 setTimeout(() => {
                     toast.classList.remove('show');
-                }, 2500);
+                }, 2800);
             });
         }
     </script>
+    <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </body>
 </html>
+
 """
 
 def get_db_password():
